@@ -252,8 +252,6 @@ Output (strict JSON):
   "reason": "short reason"
 }'''
 
-llm = MultiLLM()
-
 current_answer = ""
 latest_critique = ""
 
