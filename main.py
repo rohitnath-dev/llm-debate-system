@@ -354,6 +354,7 @@ if __name__ == "__main__":
         user_prompt = input("\n> ")
 
         if user_prompt.lower() in ["exit", "quit"]:
+            print("\nSession ended.")
             break
 
         current_answer = ""
@@ -362,22 +363,58 @@ if __name__ == "__main__":
 
         update_stm("user", user_prompt)
 
-        print("[Thinking...]")
+        print("\nThinking...\n")
 
-        for i in range(2):
+        history = []
 
+        for i in range(3):
+
+            step = {}
+
+            # --- Responder / Improve ---
             if i == 0:
                 run_responder()
+                step["stage"] = "Initial Answer"
             else:
                 run_improve()
+                step["stage"] = "Refined Answer"
 
+            step["answer"] = current_answer
+
+            # --- Critic ---
             run_critic()
+            step["critique"] = latest_critique
+            step["severity"] = parsed_critic.get("severity") if "parsed_critic" in globals() else None
+
+            # --- Judge ---
             run_judge()
+            step["use_critique"] = judge_output.get("use_critique")
+            step["reason"] = parsed_judge.get("reason") if "parsed_judge" in globals() else None
+
+            history.append(step)
 
             if not judge_output.get("use_critique", True):
                 break
 
-        print("\nFinal answer:")
+        # ===== DISPLAY (clean, user-friendly) =====
+
+        print("=== Conversation Breakdown ===\n")
+
+        for i, step in enumerate(history):
+            print(f"Step {i+1}: {step['stage']}")
+            print(f"Answer: {step['answer']}")
+
+            if step["critique"]:
+                print(f"Critic: {step['critique']} ({step['severity']})")
+
+            print(f"Judge: {'Accepted critique' if step['use_critique'] else 'No improvement needed'}")
+
+            if step["reason"]:
+                print(f"Reason: {step['reason']}")
+
+            print("-" * 40)
+
+        print("\n=== Final Answer ===\n")
         print(current_answer)
 
         update_stm("assistant", current_answer)
