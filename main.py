@@ -9,9 +9,20 @@ import re
 load_dotenv()
 
 def init_client():
-    api_key = input("Enter API key: ").strip()
-    base_url = input("Enter base URL (press enter for default): ").strip() or "https://integrate.api.nvidia.com/v1"
-    model = input("Enter model (default: deepseek-ai/deepseek-v4-flash): ").strip() or "deepseek-ai/deepseek-v4-flash"
+    default_base_url = "https://openrouter.ai/api/v1"
+    default_model = "deepseek/deepseek-chat"   # free + stable
+
+    print("\n(Press Enter to use defaults)")
+
+    api_key = input("Enter API key (OpenRouter recommended): ").strip()
+
+    base_url = input(f"Base URL [{default_base_url}]: ").strip()
+    if not base_url:
+        base_url = default_base_url
+
+    model = input(f"Model [{default_model}]: ").strip()
+    if not model:
+        model = default_model
 
     client = OpenAI(
         base_url=base_url,
@@ -255,8 +266,6 @@ Output (strict JSON):
 current_answer = ""
 latest_critique = ""
 
-user_prompt = input("Enter your Prompt: ")
-
 def extract_json(text):
     try:
         return json.loads(text)
@@ -353,7 +362,9 @@ if __name__ == "__main__":
 
         update_stm("user", user_prompt)
 
-        for i in range(5):
+        print("[Thinking...]")
+
+        for i in range(2):
 
             if i == 0:
                 run_responder()
